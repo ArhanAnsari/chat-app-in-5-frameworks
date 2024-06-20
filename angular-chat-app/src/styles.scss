@@ -1,0 +1,30 @@
+@use "stream-chat-angular/src/assets/styles/v2/scss/variables" with (
+  $assetsPath: "../node_modules/stream-chat-angular/src/assets/styles/v2/assets"
+);
+@import "stream-chat-angular/src/assets/styles/v2/scss/index.scss";
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+}
+
+#root {
+  display: flex;
+  height: 100%;
+
+  stream-channel-list {
+    width: 30%;
+  }
+
+  stream-channel {
+    width: 100%;
+  }
+
+  stream-thread {
+    width: 45%;
+  }
+}
