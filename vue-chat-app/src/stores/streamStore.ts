@@ -1,9 +1,9 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { Channel, StreamChat } from 'stream-chat'
+import { Channel, StreamChat, type DefaultGenerics } from 'stream-chat'
 
 export const useStreamStore = defineStore('stream', () => {
-  const channels = ref<any[]>([])
+  const channelKeys = ref<{ [key: string]: Channel }>({})
   const activeChannel = ref<Channel | undefined>(undefined)
 
   const apiKey = import.meta.env.VITE_APP_API_KEY
@@ -42,16 +42,34 @@ export const useStreamStore = defineStore('stream', () => {
       members: { $in: [userId] }
     }
     const options = {
-      limit: 10
+      limit: 10,
+      watch: true
     }
-    channels.value = await client.queryChannels(filters, { last_message_at: -1 }, options)
-    if (channels.value.length > 0) {
-      activeChannel.value = channels.value[0]
+    const queriedChannels: Channel<DefaultGenerics>[] = await client.queryChannels(
+      filters,
+      { last_message_at: -1 },
+      options
+    )
+    if (queriedChannels.values.length > 0) {
+      activeChannel.value = queriedChannels[0]
     }
+    for (const channel of queriedChannels) {
+      channelKeys.value[channel.cid] = channel
+    }
+    client.on('message.new', (event) => {
+      const channelId = event.cid
+      if (channelId) {
+        const channel = channelKeys.value[channelId]
+        const channelMessages = channel.state.messages
+        if (channel && event.message) {
+          channelKeys.value[channelId].state.messages = channelMessages
+        }
+      }
+    })
   }
 
   async function setActiveChannel(channel: Channel | undefined) {
     activeChannel.value = channel
   }
-  return { channels, userId, setupUser, activeChannel, setActiveChannel }
+  return { channelKeys, userId, setupUser, activeChannel, setActiveChannel }
 })

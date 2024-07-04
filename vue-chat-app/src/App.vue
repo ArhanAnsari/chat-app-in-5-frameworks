@@ -2,23 +2,33 @@
 import { storeToRefs } from 'pinia'
 import { useStreamStore } from './stores/streamStore'
 import type { Attachment, Message } from 'stream-chat'
+import { ref } from 'vue'
 
+const message = ref('')
 const store = useStreamStore()
-const { channels, activeChannel } = storeToRefs(store)
+const { channelKeys, activeChannel } = storeToRefs(store)
 store.setupUser()
 
 function imageUrlForMessage(message: Message): Attachment[] {
-  const images = message.attachments?.filter(
-    (attachment: Attachment) => attachment.type === 'image'
-  )
-  if (images?.length && images?.length > 0) {
-    // console.log(images.map((image) => JSON.stringify(image)))
-  }
-  return images ?? []
+  return message.attachments?.filter((attachment: Attachment) => attachment.type === 'image') ?? []
 }
 
 function isOwnMessage(message: Message): boolean {
   return message.user?.id === store.userId
+}
+
+function sendMessage() {
+  if (message.value.length > 0) {
+    activeChannel.value?.sendMessage({ text: message.value })
+    message.value = ''
+  }
+}
+
+function formatDate(date: Date | string): string {
+  if (typeof date === 'string') {
+    date = new Date(date)
+  }
+  return date.toLocaleDateString('en')
 }
 </script>
 
@@ -28,13 +38,18 @@ function isOwnMessage(message: Message): boolean {
       <button
         class="channelPreview"
         :class="{ activeChannelPreview: activeChannel === channel }"
-        v-for="channel in channels"
-        :key="channel.cid"
+        v-for="(channel, cid) in channelKeys"
+        :key="cid"
         @click="store.setActiveChannel(channel)"
       >
         <img :src="channel.data?.image" alt="Channel Image" />
         <div>
-          <h2>{{ channel.data?.name || channel.cid }}</h2>
+          <h2>
+            {{ channel.data?.name || channel.cid }}
+            <span class="unreadBadge" v-if="channel.countUnread() > 0">{{
+              channel.countUnread()
+            }}</span>
+          </h2>
           <p>{{ channel.state.messages[channel.state.messages.length - 1].text }}</p>
         </div>
       </button>
@@ -82,9 +97,27 @@ function isOwnMessage(message: Message): boolean {
           </div>
           <div class="messageSignature">
             <span v-if="!isOwnMessage(message as Message)">{{ message.user?.name }}</span>
-            <span>{{ message.updated_at.toLocaleDateString('en') }}</span>
+            <span>{{ formatDate(message.updated_at) }}</span>
           </div>
         </div>
+      </div>
+      <div class="messageComposer">
+        <input v-model="message" type="text" placeholder="Type your message" />
+        <button :class="{ activeIcon: message.length > 0 }" @click="sendMessage()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+            />
+          </svg>
+        </button>
       </div>
     </section>
     <div v-else>No Channel is selected</div>
@@ -132,11 +165,32 @@ h3 > p {
   cursor: pointer;
 }
 
+.channelPreview h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.unreadBadge {
+  background: red;
+  border-radius: 50%;
+  padding: 0.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: small;
+}
+
 .channelPreview > div {
   white-space: nowrap;
   overflow-x: clip;
   text-overflow: ellipsis;
   overflow-y: hidden;
+  flex: 1;
 }
 
 .channelPreview img,
@@ -243,6 +297,37 @@ h2 {
   gap: 0.5rem;
   font-size: small;
   color: #777;
+}
+
+.messageComposer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.messageComposer input[type='text'] {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid #ccc;
+}
+
+.messageComposer button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.messageComposer svg {
+  --icon-color: gray;
+  color: var(--icon-color);
+  width: 2rem;
+  aspect-ratio: 1;
+}
+
+.activeIcon svg {
+  --icon-color: #005fff;
 }
 
 @media (min-width: 1024px) {
