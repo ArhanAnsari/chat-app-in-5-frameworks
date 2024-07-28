@@ -133,18 +133,6 @@ main {
   border: 1px solid #ccc;
 }
 
-h3 {
-  border-bottom: 1px solid #ccc;
-  font-weight: bold;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-h3 > p {
-  font-size: 0.8rem;
-  color: #666;
-}
-
 .channelList {
   border-right: 1px solid #ccc;
 }
