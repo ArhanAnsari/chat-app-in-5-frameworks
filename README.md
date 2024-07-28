@@ -1,0 +1,1 @@
+This is a project accompanying the Youtube video for Building a chat app in 5 different frameworks.
