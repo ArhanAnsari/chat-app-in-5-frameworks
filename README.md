@@ -2,7 +2,7 @@
 
 ![Youtube-BuildingChat5Framworks-1280x720px](https://github.com/user-attachments/assets/db545fc4-b358-477b-84eb-e646e1cc039b)
 
-This is the project accompanying the Youtube video for [Building a chat app in 5 different frameworks](https://youtu.be/DLTDGh5sryE).
+This project accompanies the YouTube video for [Building a chat app in 5 different frameworks](https://youtu.be/o-am4BY-dhs).
 
 It shows how to build a chat app in:
 
@@ -12,6 +12,6 @@ It shows how to build a chat app in:
 - [Svelte](./svelte-chat-app/)
 - [Next.js](./nextjs-chat-app/)
 
-For more details, clone the repo and check the code or watch the full video.
+For more details, clone the repo, check the code, or watch the full video.
 
-If you have questions or want to see more apps in more frameworks, feel free to reach [out on X](https://x.com/getstream_io).
+If you have questions or want to see more apps in more frameworks, please reach [out on X](https://x.com/getstream_io).
